@@ -1,0 +1,15 @@
+{
+  "name": "europa-drone",
+  "version": "1.0.0",
+  "description": "Control an underwater drone with a USB game controller.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Christopher Stevens <cstevens@spacefoundtion.org> (http://www.spacefoundation.org)",
+  "license": "MIT",
+  "dependencies": {
+    "gamepad": "^1.4.2",
+    "rpi-gpio": "^0.9.1"
+  }
+}
