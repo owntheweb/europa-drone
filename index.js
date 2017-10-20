@@ -83,19 +83,22 @@ let EuropaDroneController = {
       self.pwmDriver.setPWMFreq(settings.pwmFrequency)
 
       // !!! TEMP test
-      var tmpMod = 0
-      var tmpDir = 2
+      var tmpMod = 240
+      var tmpDir = 4
       setInterval(function () {
         tmpMod += tmpDir
-        if (tmpMod >= 4096) {
-          tmpDir = -2
-        } else if (tmpMod <= 0) {
-          tmpDir = 0
+        if (tmpMod >= 420) {
+          tmpDir = -1
+        } else if (tmpMod <= 240) {
+          tmpDir = 1
         }
 
         self.pwmDriver.setPWM(1, 0, tmpMod)
+        self.pwmDriver.setPWM(2, 0, tmpMod)
         console.log(tmpMod)
       }, 100)
+    } else {
+      console.log('NO dep.makePwmDriver')
     }
 
     // Listen for move events on all gamepads
