@@ -1,11 +1,24 @@
 'use strict'
 
 // dependencies
-const gamepad = require('gamepad')
-//const gpio = require('rpi-gpio')
+
+const dep = {}
+dep.gamepad = require('gamepad')
+
+// this won't work on a Mac when developing, ok since hardware is running on Linux
+try {
+  dep.makePwmDriver = require('adafruit-i2c-pwm-driver')
+} catch (err) {
+  dep.makePwmDriver = null
+}
 
 // settings
 const settings = {
+  // PWM
+  pwmFrequency: 50,
+  pwmAddress: 0x40,
+  pwmDevice: '/dev/i2c-1',
+
   // motor values
   m1Min: -1.0, // motor 1 minimum/reverse value
   m1Stop: 0.0, // motor 1 stop value
@@ -52,22 +65,42 @@ let EuropaDroneController = {
   init: function () {
     let self = this // !!! should I start using ES6 arrows for events instead?
 
-    gamepad.init()
+    dep.gamepad.init()
     // List the state of all currently attached devices (dev purposes only)
-    for (var i = 0, l = gamepad.numDevices(); i < l; i++) {
-      console.log(i, gamepad.deviceAtIndex())
+    for (var i = 0, l = dep.gamepad.numDevices(); i < l; i++) {
+      console.log(i, dep.gamepad.deviceAtIndex())
     }
 
     // Create a loop and poll for events
-    setInterval(gamepad.processEvents, settings.tInt)
+    setInterval(dep.gamepad.processEvents, settings.tInt)
 
     // Scan for new gamepads as a slower rate
-    setInterval(gamepad.detectDevices, 500)
+    setInterval(dep.gamepad.detectDevices, 500)
+
+    // init PWM output (if on Linux/Pi)
+    if (dep.makePwmDriver) {
+      self.pwmDriver = dep.makePwmDriver({ address: settings.pwmAddress, device: settings.pwmDevice })
+      self.pwmDriver.setPWMFreq(settings.pwmFrequency)
+
+      // !!! TEMP test
+      var tmpMod = 0
+      var tmpDir = 2
+      setInterval(function () {
+        tmpMod += tmpDir
+        if (tmpMod >= 4096) {
+          tmpDir = -2
+        } else if (tmpMod <= 0) {
+          tmpDir = 0
+        }
+
+        self.pwmDriver.setPWM(15, 0, tmpMod)
+      }, 100)
+    }
 
     // Listen for move events on all gamepads
 
     // Handle left/right/up/down
-    gamepad.on('move', function (id, axis, value) {
+    dep.gamepad.on('move', function (id, axis, value) {
       /*
       console.log('move', {
         id: id,
@@ -118,7 +151,7 @@ let EuropaDroneController = {
     })
 
     // Handle button down events
-    gamepad.on('down', function (id, num) {
+    dep.gamepad.on('down', function (id, num) {
       /*
       console.log('down', {
         id: id,
@@ -159,7 +192,7 @@ let EuropaDroneController = {
     })
 
     // Handle button up events
-    gamepad.on('up', function (id, num) {
+    dep.gamepad.on('up', function (id, num) {
       /*
       console.log('down', {
         id: id,
@@ -284,5 +317,3 @@ let EuropaDroneController = {
 
 let droneController = Object.create(EuropaDroneController)
 droneController.init()
-
- // https://www.npmjs.com/package/rpi-gpio

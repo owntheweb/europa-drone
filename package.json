@@ -9,7 +9,9 @@
   "author": "Christopher Stevens <cstevens@spacefoundtion.org> (http://www.spacefoundation.org)",
   "license": "MIT",
   "dependencies": {
-    "gamepad": "^1.4.2",
-    "rpi-gpio": "^0.9.1"
+    "gamepad": "^1.4.2"
+  },
+  "optionalDependencies": {
+    "adafruit-i2c-pwm-driver": "^0.2.1"
   }
 }
