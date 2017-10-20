@@ -93,7 +93,8 @@ let EuropaDroneController = {
           tmpDir = 0
         }
 
-        self.pwmDriver.setPWM(15, 0, tmpMod)
+        self.pwmDriver.setPWM(1, 0, tmpMod)
+        console.log(tmpMod)
       }, 100)
     }
 
@@ -311,7 +312,8 @@ let EuropaDroneController = {
       self.m3 = m3Targ
     }
 
-    console.log('m1:', (Math.round(self.m1 * 100) / 100), 'm1Targ:', m1Targ, 'm2:', (Math.round(self.m2 * 100) / 100), 'm2Targ:', m2Targ, 'm3:', (Math.round(self.m3 * 100) / 100), 'm3Targ:', m3Targ)
+    // !!! TEMP
+    // console.log('m1:', (Math.round(self.m1 * 100) / 100), 'm1Targ:', m1Targ, 'm2:', (Math.round(self.m2 * 100) / 100), 'm2Targ:', m2Targ, 'm3:', (Math.round(self.m3 * 100) / 100), 'm3Targ:', m3Targ)
   }
 }
 
