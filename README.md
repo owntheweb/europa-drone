@@ -14,7 +14,7 @@ This project is still a work-in-progress. Stay tuned for updates.
 
 ## Hardware Setup
 
-More soon on this. Note: When plugging in survos or ESCs, make sure the ground/usually black/usually brown wire is on the bottom/out facing pin.
+More soon on this. Note: When plugging in servos or ESCs, make sure the ground/usually black/usually brown wire is on the bottom/out facing pin.
 
 ## Install Raspbian
 
