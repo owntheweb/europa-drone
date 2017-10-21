@@ -138,10 +138,24 @@ Run the following:
 node europa-drone/index.js
 ```
 
-More on this soon. An actual test script also needs to be created.
+## Start Script On Boot
+
+Edit startup script to run loop that keeps the node script running indefinitely on boot, restarting if it crashes.
+
+```
+sudo nano /etc/rc.local
+```
+
+Add this *before* the "exit 0" line:
+
+```
+(runuser -l pi -c '/bin/bash /home/pi/europa-drone/bash/loop.bash')&
+```
+
+Restart the Pi. After it is booted, the script should running.
 
 ## To Be Continued...
 
-The script will need to auto-run once booted. Testing notes need to be added. Hardware setup is still being worked out. Anything else missing will be added as available.
+Testing notes need to be added. Hardware setup is still being worked out. Anything else missing will be added as available.
 
 Stay tuned!
