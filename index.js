@@ -1,7 +1,6 @@
 'use strict'
 
 // dependencies
-
 const dep = {}
 dep.gamepad = require('gamepad')
 
@@ -20,15 +19,18 @@ const settings = {
   pwmDevice: '/dev/i2c-1',
 
   // motor values
-  m1Min: -1.0, // motor 1 minimum/reverse value
-  m1Stop: 0.0, // motor 1 stop value
-  m1Max: 1.0, // motor 1 max/forward value
-  m2Min: -1.0, // motor 2 minimum/reverse value
-  m2Stop: 0.0, // motor 2 stop value
-  m2Max: 1.0, // motor 2 max/forward value
-  m3Min: -1.0, // motor 3 minimum/reverse value
-  m3Stop: 0.0, // motor 3 stop value
-  m3Max: 1.0, // motor 3 max/forward value
+  m1PwmPin: 0, // pin # on PWM hat
+  m1Min: 240, // motor 1 minimum/reverse value
+  m1Stop: 320, // motor 1 stop value
+  m1Max: 440, // motor 1 max/forward value
+  m2PwmPin: 1, // pin # on PWM hat
+  m2Min: 240, // motor 2 minimum/reverse value
+  m2Stop: 320, // motor 2 stop value
+  m2Max: 440, // motor 2 max/forward value
+  m3PwmPin: 2, // pin # on PWM hat
+  m3Min: 240, // motor 3 minimum/reverse value
+  m3Stop: 320, // motor 3 stop value
+  m3Max: 440, // motor 3 max/forward value
 
   // auxillary toggle values
   a1On: 1.0, // aux 1 on value
@@ -37,22 +39,17 @@ const settings = {
   a2Off: 0.0, // aux 2 off value
 
   // timing and increment values
-  tInc: 0.1, // value change increment when ramping values at tInt
-  tInt: 50, // number of miliseconds per interval when updating values
-
-  // Raspberry Pi pins
-  m1Out: 0,
-  m2Out: 0,
-  m3Out: 0
+  tInc: 0.05, // value change increment when ramping values at tInt (multiplier 0-1)
+  tInt: 50 // number of miliseconds per interval when updating values
 }
 
 // !!! let for changing values or use const for non-changing binding (but properties change, confusing...)??
 let EuropaDroneController = {
-  m1: 0,
-  m2: 0,
-  m3: 0,
-  a1: 0,
-  a2: 0,
+  m1: settings.m1Stop,
+  m2: settings.m2Stop,
+  m3: settings.m3Stop,
+  a1: settings.a1Off,
+  a2: settings.a2Off,
   leftActive: false,
   rightActive: false,
   forwardActive: false,
@@ -82,21 +79,30 @@ let EuropaDroneController = {
       self.pwmDriver = dep.makePwmDriver({ address: settings.pwmAddress, device: settings.pwmDevice })
       self.pwmDriver.setPWMFreq(settings.pwmFrequency)
 
+      self.pwmDriver.setPWM(settings.m1PwmPin, 0, settings.m1Stop)
+      self.pwmDriver.setPWM(settings.m2PwmPin, 0, settings.m2Stop)
+      self.pwmDriver.setPWM(settings.m3PwmPin, 0, settings.m3Stop)
+
+      // reset to idle
+      self.pwmDriver.setPWM(settings.m1PwmPin, 0, settings.m1Stop)
+
       // !!! TEMP test
+      /*
       var tmpMod = 240
       var tmpDir = 4
       setInterval(function () {
         tmpMod += tmpDir
         if (tmpMod >= 420) {
-          tmpDir = -1
+          tmpDir = -4
         } else if (tmpMod <= 240) {
-          tmpDir = 1
+          tmpDir = 4
         }
 
         self.pwmDriver.setPWM(1, 0, tmpMod)
         self.pwmDriver.setPWM(2, 0, tmpMod)
         console.log(tmpMod)
       }, 100)
+      */
     } else {
       console.log('NO dep.makePwmDriver')
     }
@@ -120,33 +126,33 @@ let EuropaDroneController = {
         // axis button pressed
         if (axis === 1) { // up/down
           if (value === -1) { // up
-            // console.log('forward')
+            console.log('forward')
             self.forwardActive = true
           } else if (value === 1) { // down
-            // console.log('backward')
+            console.log('backward')
             self.backwardActive = true
           } else if (value === 0) { // axis released
             if (self.forwardActive === true) {
-              // console.log('forward released')
+              console.log('forward released')
               self.forwardActive = false
             } else if (self.backwardActive === true) {
-              // console.log('backward released')
+              console.log('backward released')
               self.backwardActive = false
             }
           }
         } else { // left/right
           if (value === -1) { // left
-            // console.log('left')
+            console.log('left')
             self.leftActive = true
           } else if (value === 1) { // right
-            // console.log('right')
+            console.log('right')
             self.rightActive = true
           } else if (value === 0) { // axis released
             if (self.leftActive === true) {
-              // console.log('left released')
+              console.log('left released')
               self.leftActive = false
             } else if (self.rightActive === true) {
-              // console.log('right released')
+              console.log('right released')
               self.rightActive = false
             }
           }
@@ -290,32 +296,36 @@ let EuropaDroneController = {
     }
 
     // ease motor values
-    // !!! crude linear for now, update later
-    if (m1Targ > self.m1 && Math.abs(m1Targ - self.m1) > settings.tInc / 2) {
-      self.m1 += settings.tInc
-    } else if (m1Targ < self.m1 && Math.abs(m1Targ - self.m1) > settings.tInc / 2) {
-      self.m1 -= settings.tInc
+    if (m1Targ > self.m1 && Math.abs(m1Targ - self.m1) > (m1Targ * settings.tInc / 2)) {
+      self.m1 += m1Targ * settings.tInc
+    } else if (m1Targ < self.m1 && Math.abs(m1Targ - self.m1) > (m1Targ * settings.tInc / 2)) {
+      self.m1 -= m1Targ * settings.tInc
     } else {
       self.m1 = m1Targ
     }
 
-    if (m2Targ > self.m2 && Math.abs(m2Targ - self.m2) > settings.tInc / 2) {
-      self.m2 += settings.tInc
-    } else if (m2Targ < self.m2 && Math.abs(m2Targ - self.m2) > settings.tInc / 2) {
-      self.m2 -= settings.tInc
+    if (m2Targ > self.m2 && Math.abs(m2Targ - self.m2) > (m2Targ * settings.tInc / 2)) {
+      self.m2 += m2Targ * settings.tInc
+    } else if (m2Targ < self.m2 && Math.abs(m2Targ - self.m2) > (m2Targ * settings.tInc / 2)) {
+      self.m2 -= m2Targ * settings.tInc
     } else {
       self.m2 = m2Targ
     }
 
-    if (m3Targ > self.m3 && Math.abs(m3Targ - self.m3) > settings.tInc / 2) {
-      self.m3 += settings.tInc
-    } else if (m3Targ < self.m3 && Math.abs(m3Targ - self.m3) > settings.tInc / 2) {
-      self.m3 -= settings.tInc
+    if (m3Targ > self.m3 && Math.abs(m3Targ - self.m3) > (m3Targ * settings.tInc / 2)) {
+      self.m3 += m3Targ * settings.tInc
+    } else if (m3Targ < self.m3 && Math.abs(m3Targ - self.m3) > (m3Targ * settings.tInc / 2)) {
+      self.m3 -= m3Targ * settings.tInc
     } else {
       self.m3 = m3Targ
     }
 
-    // !!! TEMP
+    if (dep.makePwmDriver) {
+      self.pwmDriver.setPWM(settings.m1PwmPin, 0, self.m1)
+      self.pwmDriver.setPWM(settings.m2PwmPin, 0, self.m2)
+      self.pwmDriver.setPWM(settings.m3PwmPin, 0, self.m3)
+    }
+
     // console.log('m1:', (Math.round(self.m1 * 100) / 100), 'm1Targ:', m1Targ, 'm2:', (Math.round(self.m2 * 100) / 100), 'm2Targ:', m2Targ, 'm3:', (Math.round(self.m3 * 100) / 100), 'm3Targ:', m3Targ)
   }
 }
