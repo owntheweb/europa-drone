@@ -14,23 +14,23 @@ try {
 // settings
 const settings = {
   // PWM
-  pwmFrequency: 50,
+  pwmFrequency: 60,
   pwmAddress: 0x40,
   pwmDevice: '/dev/i2c-1',
 
   // motor values
   m1PwmPin: 0, // pin # on PWM hat
-  m1Min: 240, // motor 1 minimum/reverse value
-  m1Stop: 320, // motor 1 stop value
-  m1Max: 440, // motor 1 max/forward value
+  m1Min: 295, // motor 1 minimum/reverse value
+  m1Stop: 390, // motor 1 stop value
+  m1Max: 490, // motor 1 max/forward value
   m2PwmPin: 1, // pin # on PWM hat
-  m2Min: 240, // motor 2 minimum/reverse value
-  m2Stop: 320, // motor 2 stop value
-  m2Max: 440, // motor 2 max/forward value
+  m2Min: 295, // motor 2 minimum/reverse value
+  m2Stop: 390, // motor 2 stop value
+  m2Max: 490, // motor 2 max/forward value
   m3PwmPin: 2, // pin # on PWM hat
-  m3Min: 240, // motor 3 minimum/reverse value
-  m3Stop: 320, // motor 3 stop value
-  m3Max: 440, // motor 3 max/forward value
+  m3Min: 295, // motor 3 minimum/reverse value
+  m3Stop: 390, // motor 3 stop value
+  m3Max: 490, // motor 3 max/forward value
 
   // auxillary toggle values
   a1On: 1.0, // aux 1 on value
@@ -40,7 +40,7 @@ const settings = {
 
   // timing and increment values
   tInc: 0.05, // value change increment when ramping values at tInt (multiplier 0-1)
-  tInt: 50 // number of miliseconds per interval when updating values
+  tInt: 70 // number of miliseconds per interval when updating values
 }
 
 // !!! let for changing values or use const for non-changing binding (but properties change, confusing...)??
@@ -79,12 +79,12 @@ let EuropaDroneController = {
       self.pwmDriver = dep.makePwmDriver({ address: settings.pwmAddress, device: settings.pwmDevice })
       self.pwmDriver.setPWMFreq(settings.pwmFrequency)
 
-      self.pwmDriver.setPWM(settings.m1PwmPin, 0, settings.m1Stop)
-      self.pwmDriver.setPWM(settings.m2PwmPin, 0, settings.m2Stop)
-      self.pwmDriver.setPWM(settings.m3PwmPin, 0, settings.m3Stop)
-
       // reset to idle
-      self.pwmDriver.setPWM(settings.m1PwmPin, 0, settings.m1Stop)
+      // !!! leave on for now to not stop rover if unresolved gamepad issue kicks in (may take a look myself soon)
+      // https://github.com/creationix/node-gamepad/issues/15
+      // self.pwmDriver.setPWM(settings.m1PwmPin, 0, settings.m1Stop)
+      // self.pwmDriver.setPWM(settings.m2PwmPin, 0, settings.m2Stop)
+      // self.pwmDriver.setPWM(settings.m3PwmPin, 0, settings.m3Stop)
 
       // !!! TEMP test
       /*
@@ -103,6 +103,32 @@ let EuropaDroneController = {
         console.log(tmpMod)
       }, 100)
       */
+      /*
+      var tmpMod = 384
+      tmpMod = 666
+      var delay = 50
+      setInterval(function () {
+      */
+        /*
+        tmpMod += tmpDir
+        if (tmpMod >= 420) {
+          tmpDir = -4
+        } else if (tmpMod <= 240) {
+          tmpDir = 4
+        }
+        */
+        /*
+        delay -= 1;
+        if(delay <= 0) {
+          delay = 50
+          tmpMod += 1;
+          self.pwmDriver.setPWM(1, 0, tmpMod)
+          console.log(tmpMod)
+        }
+
+      }, 100)
+      */
+      // !!!
     } else {
       console.log('NO dep.makePwmDriver')
     }
