@@ -13,54 +13,128 @@ try {
 
 // settings
 const settings = {
-  // PWM
+  // PWM hat
   pwmFrequency: 60,
   pwmAddress: 0x40,
   pwmDevice: '/dev/i2c-1',
 
-  // motor values
-  m1PwmPin: 0, // pin # on PWM hat
-  m1Min: 295, // motor 1 minimum/reverse value
-  m1Stop: 390, // motor 1 stop value
-  m1Max: 490, // motor 1 max/forward value
-  m2PwmPin: 1, // pin # on PWM hat
-  m2Min: 295, // motor 2 minimum/reverse value
-  m2Stop: 390, // motor 2 stop value
-  m2Max: 490, // motor 2 max/forward value
-  m3PwmPin: 2, // pin # on PWM hat
-  m3Min: 295, // motor 3 minimum/reverse value
-  m3Stop: 390, // motor 3 stop value
-  m3Max: 490, // motor 3 max/forward value
-
-  // auxillary toggle values
-  a1On: 1.0, // aux 1 on value
-  a1Off: 0.0, // aux 2 off value
-  a2On: 1.0, // aux 1 on value
-  a2Off: 0.0, // aux 2 off value
-
   // timing and increment values
   tInc: 0.05, // value change increment when ramping values at tInt (multiplier 0-1)
-  tInt: 70 // number of miliseconds per interval when updating values
+  tInt: 70, // number of miliseconds per interval when updating values
+
+  // motor values
+  rovs: [
+    // rov 1 (first detected controller)
+    {
+      m1PwmPin: 0, // pin # on PWM hat
+      m1Min: 295, // motor 1 minimum/reverse value
+      m1Stop: 390, // motor 1 stop value
+      m1Max: 490, // motor 1 max/forward value
+      m2PwmPin: 1, // pin # on PWM hat
+      m2Min: 295, // motor 2 minimum/reverse value
+      m2Stop: 390, // motor 2 stop value
+      m2Max: 490, // motor 2 max/forward value
+      m3PwmPin: 2, // pin # on PWM hat
+      m3Min: 295, // motor 3 minimum/reverse value
+      m3Stop: 390, // motor 3 stop value
+      m3Max: 490, // motor 3 max/forward value
+
+      // auxillary toggle values
+      a1On: 1.0, // aux 1 on value
+      a1Off: 0.0, // aux 2 off value
+      a2On: 1.0, // aux 1 on value
+      a2Off: 0.0 // aux 2 off value
+    },
+
+    // rov 2 (second detected controller)
+    {
+      m1PwmPin: 3, // pin # on PWM hat
+      m1Min: 295, // motor 1 minimum/reverse value
+      m1Stop: 390, // motor 1 stop value
+      m1Max: 490, // motor 1 max/forward value
+      m2PwmPin: 4, // pin # on PWM hat
+      m2Min: 295, // motor 2 minimum/reverse value
+      m2Stop: 390, // motor 2 stop value
+      m2Max: 490, // motor 2 max/forward value
+      m3PwmPin: 5, // pin # on PWM hat
+      m3Min: 295, // motor 3 minimum/reverse value
+      m3Stop: 390, // motor 3 stop value
+      m3Max: 490, // motor 3 max/forward value
+
+      // auxillary toggle values
+      a1On: 1.0, // aux 1 on value
+      a1Off: 0.0, // aux 2 off value
+      a2On: 1.0, // aux 1 on value
+      a2Off: 0.0 // aux 2 off value
+    },
+
+    // rov 3 (third detected controller)
+    {
+      m1PwmPin: 6, // pin # on PWM hat
+      m1Min: 295, // motor 1 minimum/reverse value
+      m1Stop: 390, // motor 1 stop value
+      m1Max: 490, // motor 1 max/forward value
+      m2PwmPin: 7, // pin # on PWM hat
+      m2Min: 295, // motor 2 minimum/reverse value
+      m2Stop: 390, // motor 2 stop value
+      m2Max: 490, // motor 2 max/forward value
+      m3PwmPin: 8, // pin # on PWM hat
+      m3Min: 295, // motor 3 minimum/reverse value
+      m3Stop: 390, // motor 3 stop value
+      m3Max: 490, // motor 3 max/forward value
+
+      // auxillary toggle values
+      a1On: 1.0, // aux 1 on value
+      a1Off: 0.0, // aux 2 off value
+      a2On: 1.0, // aux 1 on value
+      a2Off: 0.0 // aux 2 off value
+    },
+
+    // rov 4 (fourth detected controller)
+    {
+      m1PwmPin: 9, // pin # on PWM hat
+      m1Min: 295, // motor 1 minimum/reverse value
+      m1Stop: 390, // motor 1 stop value
+      m1Max: 490, // motor 1 max/forward value
+      m2PwmPin: 10, // pin # on PWM hat
+      m2Min: 295, // motor 2 minimum/reverse value
+      m2Stop: 390, // motor 2 stop value
+      m2Max: 490, // motor 2 max/forward value
+      m3PwmPin: 11, // pin # on PWM hat
+      m3Min: 295, // motor 3 minimum/reverse value
+      m3Stop: 390, // motor 3 stop value
+      m3Max: 490, // motor 3 max/forward value
+
+      // auxillary toggle values
+      a1On: 1.0, // aux 1 on value
+      a1Off: 0.0, // aux 2 off value
+      a2On: 1.0, // aux 1 on value
+      a2Off: 0.0 // aux 2 off value
+    }
+  ]
 }
 
-// !!! let for changing values or use const for non-changing binding (but properties change, confusing...)??
 let EuropaDroneController = {
-  m1: settings.m1Stop,
-  m2: settings.m2Stop,
-  m3: settings.m3Stop,
-  a1: settings.a1Off,
-  a2: settings.a2Off,
-  leftActive: false,
-  rightActive: false,
-  forwardActive: false,
-  backwardActive: false,
-  upActive: false,
-  downActive: false,
-  aux1Active: false,
-  aux2Active: false,
+  rovs: settings.rovs.map(function (rov) {
+    return {
+      m1: rov.m1Stop,
+      m2: rov.m2Stop,
+      m3: rov.m3Stop,
+      a1: rov.a1Off,
+      a2: rov.a2Off,
+      leftActive: false,
+      rightActive: false,
+      forwardActive: false,
+      backwardActive: false,
+      upActive: false,
+      downActive: false,
+      aux1Active: false,
+      aux2Active: false
+    }
+  }),
 
   init: function () {
-    let self = this // !!! should I start using ES6 arrows for events instead?
+    let _self = this
 
     dep.gamepad.init()
     // List the state of all currently attached devices (dev purposes only)
@@ -76,15 +150,15 @@ let EuropaDroneController = {
 
     // init PWM output (if on Linux/Pi)
     if (dep.makePwmDriver) {
-      self.pwmDriver = dep.makePwmDriver({ address: settings.pwmAddress, device: settings.pwmDevice })
-      self.pwmDriver.setPWMFreq(settings.pwmFrequency)
+      _self.pwmDriver = dep.makePwmDriver({ address: settings.pwmAddress, device: settings.pwmDevice })
+      _self.pwmDriver.setPWMFreq(settings.pwmFrequency)
 
       // reset to idle
-      // !!! leave on for now to not stop rover if unresolved gamepad issue kicks in (may take a look myself soon)
+      // !!! leave on for now to not stop rover if unresolved gamepad issue kicks in (may take a look my_self soon)
       // https://github.com/creationix/node-gamepad/issues/15
-      // self.pwmDriver.setPWM(settings.m1PwmPin, 0, settings.m1Stop)
-      // self.pwmDriver.setPWM(settings.m2PwmPin, 0, settings.m2Stop)
-      // self.pwmDriver.setPWM(settings.m3PwmPin, 0, settings.m3Stop)
+      // _self.pwmDriver.setPWM(settings.m1PwmPin, 0, settings.m1Stop)
+      // _self.pwmDriver.setPWM(settings.m2PwmPin, 0, settings.m2Stop)
+      // _self.pwmDriver.setPWM(settings.m3PwmPin, 0, settings.m3Stop)
 
       // !!! TEMP test
       /*
@@ -98,8 +172,8 @@ let EuropaDroneController = {
           tmpDir = 4
         }
 
-        self.pwmDriver.setPWM(1, 0, tmpMod)
-        self.pwmDriver.setPWM(2, 0, tmpMod)
+        _self.pwmDriver.setPWM(1, 0, tmpMod)
+        _self.pwmDriver.setPWM(2, 0, tmpMod)
         console.log(tmpMod)
       }, 100)
       */
@@ -122,13 +196,13 @@ let EuropaDroneController = {
         if(delay <= 0) {
           delay = 50
           tmpMod += 1;
-          self.pwmDriver.setPWM(1, 0, tmpMod)
+          _self.pwmDriver.setPWM(1, 0, tmpMod)
           console.log(tmpMod)
         }
 
       }, 100)
       */
-      // !!!
+      // END TEMP TEST
     } else {
       console.log('NO dep.makePwmDriver')
     }
@@ -136,7 +210,7 @@ let EuropaDroneController = {
     // Listen for move events on all gamepads
 
     // Handle left/right/up/down
-    dep.gamepad.on('move', function (id, axis, value) {
+    dep.gamepad.on('move', function (padIndex, axis, value) {
       /*
       console.log('move', {
         id: id,
@@ -147,47 +221,44 @@ let EuropaDroneController = {
 
       value = Math.round(value)
 
-      // support one controller for now
-      if (id === 0) {
-        // axis button pressed
-        if (axis === 1) { // up/down
-          if (value === -1) { // up
-            console.log('forward')
-            self.forwardActive = true
-          } else if (value === 1) { // down
-            console.log('backward')
-            self.backwardActive = true
-          } else if (value === 0) { // axis released
-            if (self.forwardActive === true) {
-              console.log('forward released')
-              self.forwardActive = false
-            } else if (self.backwardActive === true) {
-              console.log('backward released')
-              self.backwardActive = false
-            }
+      // axis button pressed
+      if (axis === 1) { // up/down
+        if (value === -1) { // up
+          console.log('forward, gamepad: ' + padIndex)
+          _self.rovs[padIndex].forwardActive = true
+        } else if (value === 1) { // down
+          console.log('backward, gamepad: ' + padIndex)
+          _self.rovs[padIndex].backwardActive = true
+        } else if (value === 0) { // axis released
+          if (_self.rovs[padIndex].forwardActive === true) {
+            console.log('forward released, gamepad: ' + padIndex)
+            _self.rovs[padIndex].forwardActive = false
+          } else if (_self.rovs[padIndex].backwardActive === true) {
+            console.log('backward released, gamepad: ' + padIndex)
+            _self.rovs[padIndex].backwardActive = false
           }
-        } else { // left/right
-          if (value === -1) { // left
-            console.log('left')
-            self.leftActive = true
-          } else if (value === 1) { // right
-            console.log('right')
-            self.rightActive = true
-          } else if (value === 0) { // axis released
-            if (self.leftActive === true) {
-              console.log('left released')
-              self.leftActive = false
-            } else if (self.rightActive === true) {
-              console.log('right released')
-              self.rightActive = false
-            }
+        }
+      } else { // left/right
+        if (value === -1) { // left
+          console.log('left, gamepad: ' + padIndex)
+          _self.rovs[padIndex].leftActive = true
+        } else if (value === 1) { // right
+          console.log('right, gamepad: ' + padIndex)
+          _self.rovs[padIndex].rightActive = true
+        } else if (value === 0) { // axis released
+          if (_self.rovs[padIndex].leftActive === true) {
+            console.log('left released, gamepad: ' + padIndex)
+            _self.rovs[padIndex].leftActive = false
+          } else if (_self.rovs[padIndex].rightActive === true) {
+            console.log('right released, gamepad: ' + padIndex)
+            _self.rovs[padIndex].rightActive = false
           }
         }
       }
     })
 
     // Handle button down events
-    dep.gamepad.on('down', function (id, num) {
+    dep.gamepad.on('down', function (padIndex, num) {
       /*
       console.log('down', {
         id: id,
@@ -195,40 +266,37 @@ let EuropaDroneController = {
       })
       */
 
-      // support one controller for now
-      if (id === 0) {
-        if (num === 0) { // B on NES USB controller
-          // console.log('B')
-          console.log('down')
-          self.downActive = true
-        } else if (num === 1) { // A on NES USB controller
-          // console.log('A')
-          console.log('up')
-          self.upActive = true
-        } else if (num === 8) { // select on NES USB controller
-          // console.log('select')
-          if (self.aux1Active === false) {
-            console.log('aux 1 on')
-            self.aux1Active = true
-          } else {
-            console.log('aux 1 off')
-            self.aux1Active = false
-          }
-        } else if (num === 9) { // start on NES USB controller
-          // console.log('start')
-          if (self.aux2Active === false) {
-            console.log('aux 2 on')
-            self.aux2Active = true
-          } else {
-            console.log('aux 2 off')
-            self.aux2Active = false
-          }
+      if (num === 0) { // B on NES USB controller
+        // console.log('B')
+        console.log('down, gamepad: ' + padIndex)
+        _self.rovs[padIndex].downActive = true
+      } else if (num === 1) { // A on NES USB controller
+        // console.log('A')
+        console.log('up, gamepad: ' + padIndex)
+        _self.rovs[padIndex].upActive = true
+      } else if (num === 8) { // select on NES USB controller
+        // console.log('select')
+        if (_self.rovs[padIndex].aux1Active === false) {
+          console.log('aux 1 on, gamepad: ' + padIndex)
+          _self.rovs[padIndex].aux1Active = true
+        } else {
+          console.log('aux 1 off, gamepad: ' + padIndex)
+          _self.rovs[padIndex].aux1Active = false
+        }
+      } else if (num === 9) { // start on NES USB controller
+        // console.log('start')
+        if (_self.rovs[padIndex].aux2Active === false) {
+          console.log('aux 2 on, gamepad: ' + padIndex)
+          _self.rovs[padIndex].aux2Active = true
+        } else {
+          console.log('aux 2 off, gamepad: ' + padIndex)
+          _self.rovs[padIndex].aux2Active = false
         }
       }
     })
 
     // Handle button up events
-    dep.gamepad.on('up', function (id, num) {
+    dep.gamepad.on('up', function (padIndex, num) {
       /*
       console.log('down', {
         id: id,
@@ -237,122 +305,124 @@ let EuropaDroneController = {
       */
 
       // support one controller for now
-      if (id === 0) {
-        if (num === 0) { // B on NES USB controller
-          console.log('down released')
-          self.downActive = false
-        } else if (num === 1) { // A on NES USB controller
-          // console.log('A released')
-          console.log('up released')
-          self.upActive = false
-        } else if (num === 8) { // select on NES USB controller
-          // console.log('select released')
-        } else if (num === 9) { // start on NES USB controller
-          // console.log('start released')
-        }
+      if (num === 0) { // B on NES USB controller
+        console.log('down released, gamepad: ' + padIndex)
+        _self.rovs[padIndex].downActive = false
+      } else if (num === 1) { // A on NES USB controller
+        // console.log('A released')
+        console.log('up released, gamepad: ' + padIndex)
+        _self.rovs[padIndex].upActive = false
+      } else if (num === 8) { // select on NES USB controller
+        // console.log('select released')
+      } else if (num === 9) { // start on NES USB controller
+        // console.log('start released')
       }
     })
 
     // Ramp motors acceleration
     setInterval(function () {
-      self.rampMotors()
+      _self.rampMotors()
     }, settings.tInt)
   },
 
   // Ramp motors acceleration
   rampMotors: function () {
-    let self = this // !!! should I start using ES6 arrows for events instead?
-    let m1Targ, m2Targ, m3Targ
+    let _self = this // !!! should I start using ES6 arrows for events instead?
+    _self.rovs.map(function (rov, rovIndex) {
+      let m1Targ, m2Targ, m3Targ
 
-    // forward movement using motors 1 (forward facing left motor) and 2 (forward facing right motor)
-    if (self.forwardActive === true && self.leftActive === false && self.rightActive === false) { // full forward
-      m1Targ = settings.m1Max
-      m2Targ = settings.m2Max
-    } else if (self.forwardActive === true && self.leftActive === true) { // forward, lean left
-      m1Targ = settings.m1Max - (settings.m1Stop + settings.m1Max * 0.50)
-      m2Targ = settings.m2Max
-    } else if (self.forwardActive === true && self.rightActive === true) { // forward, lean right
-      m1Targ = settings.m1Max
-      m2Targ = settings.m2Max - (settings.m2Stop + settings.m2Max * 0.50)
-    } else if (self.backwardActive === false && self.leftActive === false && self.rightActive === false) {
-      m1Targ = settings.m1Stop
-      m2Targ = settings.m2Stop
-    }
+      // forward movement using motors 1 (forward facing left motor) and 2 (forward facing right motor)
+      if (_self.rovs[rovIndex].forwardActive === true && _self.rovs[rovIndex].leftActive === false && _self.rovs[rovIndex].rightActive === false) { // full forward
+        m1Targ = settings.rovs[rovIndex].m1Max
+        m2Targ = settings.rovs[rovIndex].m2Max
+      } else if (_self.rovs[rovIndex].forwardActive === true && _self.rovs[rovIndex].leftActive === true) { // forward, lean left
+        m1Targ = settings.rovs[rovIndex].m1Stop + ((settings.rovs[rovIndex].m1Max - settings.rovs[rovIndex].m1Stop) * 0.50)
+        m2Targ = settings.rovs[rovIndex].m2Max
+      } else if (_self.rovs[rovIndex].forwardActive === true && _self.rovs[rovIndex].rightActive === true) { // forward, lean right
+        m1Targ = settings.rovs[rovIndex].m1Max
+        m2Targ = settings.rovs[rovIndex].m2Max + ((settings.rovs[rovIndex].m2Stop - settings.rovs[rovIndex].m2Max) * 0.50)
+      } else if (_self.rovs[rovIndex].backwardActive === false && _self.rovs[rovIndex].leftActive === false && _self.rovs[rovIndex].rightActive === false) {
+        m1Targ = settings.rovs[rovIndex].m1Stop
+        m2Targ = settings.rovs[rovIndex].m2Stop
+      }
 
-    // backward movement
-    if (self.backwardActive === true && self.leftActive === false && self.rightActive === false) { // full reverse
-      m1Targ = settings.m1Min
-      m2Targ = settings.m2Min
-    } else if (self.backwardActive === true && self.leftActive === true) { // reverse, lean left
-      m1Targ = settings.m1Min - (settings.m1Stop + settings.m1Min * 0.50)
-      m2Targ = settings.m2Min
-    } else if (self.backwardActive === true && self.rightActive === true) { // reverse, lean right
-      m1Targ = settings.m1Min
-      m2Targ = settings.m2Min - (settings.m2Stop + settings.m2Min * 0.50)
-    } else if (self.forwardActive === false && self.leftActive === false && self.rightActive === false) {
-      m1Targ = settings.m1Stop
-      m2Targ = settings.m2Stop
-    }
+      // backward movement
+      if (_self.rovs[rovIndex].backwardActive === true && _self.rovs[rovIndex].leftActive === false && _self.rovs[rovIndex].rightActive === false) { // full reverse
+        m1Targ = settings.rovs[rovIndex].m1Min
+        m2Targ = settings.rovs[rovIndex].m2Min
+      } else if (_self.rovs[rovIndex].backwardActive === true && _self.rovs[rovIndex].leftActive === true) { // reverse, lean left
+        m1Targ = settings.rovs[rovIndex].m1Min + ((settings.rovs[rovIndex].m1Stop - settings.rovs[rovIndex].m1Min) * 0.50)
+        m2Targ = settings.rovs[rovIndex].m2Min
+      } else if (_self.rovs[rovIndex].backwardActive === true && _self.rovs[rovIndex].rightActive === true) { // reverse, lean right
+        m1Targ = settings.rovs[rovIndex].m1Min
+        m2Targ = settings.rovs[rovIndex].m2Min + ((settings.rovs[rovIndex].m2Stop - settings.rovs[rovIndex].m2Min) * 0.50)
+      } else if (_self.rovs[rovIndex].forwardActive === false && _self.rovs[rovIndex].leftActive === false && _self.rovs[rovIndex].rightActive === false) {
+        m1Targ = settings.rovs[rovIndex].m1Stop
+        m2Targ = settings.rovs[rovIndex].m2Stop
+      }
 
-    // left turn
-    if (self.leftActive === true && self.forwardActive === false && self.backwardActive === false) {
-      m1Targ = settings.m1Min
-      m2Targ = settings.m2Max
-    }
+      // left turn
+      if (_self.rovs[rovIndex].leftActive === true && _self.rovs[rovIndex].forwardActive === false && _self.rovs[rovIndex].backwardActive === false) {
+        m1Targ = settings.rovs[rovIndex].m1Min
+        m2Targ = settings.rovs[rovIndex].m2Max
+      }
 
-    // right turn
-    if (self.rightActive === true && self.forwardActive === false && self.backwardActive === false) {
-      m1Targ = settings.m1Max
-      m2Targ = settings.m2Min
-    }
+      // right turn
+      if (_self.rovs[rovIndex].rightActive === true && _self.rovs[rovIndex].forwardActive === false && _self.rovs[rovIndex].backwardActive === false) {
+        m1Targ = settings.rovs[rovIndex].m1Max
+        m2Targ = settings.rovs[rovIndex].m2Min
+      }
 
-    // submerge
-    if (self.downActive === true && self.upActive === false) {
-      m3Targ = settings.m3Max
-    }
+      // submerge
+      if (_self.rovs[rovIndex].downActive === true && _self.rovs[rovIndex].upActive === false) {
+        m3Targ = settings.rovs[rovIndex].m3Max
+      }
 
-    // surface
-    if (self.upActive === true && self.downActive === false) {
-      m3Targ = settings.m3Min
-    }
+      // surface
+      if (_self.rovs[rovIndex].upActive === true && _self.rovs[rovIndex].downActive === false) {
+        m3Targ = settings.rovs[rovIndex].m3Min
+      }
 
-    // no vertical movement (also if pressing both buttons at once)
-    if ((self.downActive === false && self.upActive === false) || (self.downActive === true && self.upActive === true)) {
-      m3Targ = settings.m3Stop
-    }
+      // no vertical movement (also if pressing both buttons at once)
+      if ((_self.rovs[rovIndex].downActive === false && _self.rovs[rovIndex].upActive === false) || (_self.rovs[rovIndex].downActive === true && _self.rovs[rovIndex].upActive === true)) {
+        m3Targ = settings.rovs[rovIndex].m3Stop
+      }
 
-    // ease motor values
-    if (m1Targ > self.m1 && Math.abs(m1Targ - self.m1) > (m1Targ * settings.tInc / 2)) {
-      self.m1 += m1Targ * settings.tInc
-    } else if (m1Targ < self.m1 && Math.abs(m1Targ - self.m1) > (m1Targ * settings.tInc / 2)) {
-      self.m1 -= m1Targ * settings.tInc
-    } else {
-      self.m1 = m1Targ
-    }
+      // ease motor values
+      if (m1Targ > _self.rovs[rovIndex].m1 && Math.abs(m1Targ - _self.rovs[rovIndex].m1) > (m1Targ * settings.tInc / 2)) {
+        _self.rovs[rovIndex].m1 += m1Targ * settings.tInc
+      } else if (m1Targ < _self.rovs[rovIndex].m1 && Math.abs(m1Targ - _self.rovs[rovIndex].m1) > (m1Targ * settings.tInc / 2)) {
+        _self.rovs[rovIndex].m1 -= m1Targ * settings.tInc
+      } else {
+        _self.rovs[rovIndex].m1 = m1Targ
+      }
 
-    if (m2Targ > self.m2 && Math.abs(m2Targ - self.m2) > (m2Targ * settings.tInc / 2)) {
-      self.m2 += m2Targ * settings.tInc
-    } else if (m2Targ < self.m2 && Math.abs(m2Targ - self.m2) > (m2Targ * settings.tInc / 2)) {
-      self.m2 -= m2Targ * settings.tInc
-    } else {
-      self.m2 = m2Targ
-    }
+      if (m2Targ > _self.rovs[rovIndex].m2 && Math.abs(m2Targ - _self.rovs[rovIndex].m2) > (m2Targ * settings.tInc / 2)) {
+        _self.rovs[rovIndex].m2 += m2Targ * settings.tInc
+      } else if (m2Targ < _self.rovs[rovIndex].m2 && Math.abs(m2Targ - _self.rovs[rovIndex].m2) > (m2Targ * settings.tInc / 2)) {
+        _self.rovs[rovIndex].m2 -= m2Targ * settings.tInc
+      } else {
+        _self.rovs[rovIndex].m2 = m2Targ
+      }
 
-    if (m3Targ > self.m3 && Math.abs(m3Targ - self.m3) > (m3Targ * settings.tInc / 2)) {
-      self.m3 += m3Targ * settings.tInc
-    } else if (m3Targ < self.m3 && Math.abs(m3Targ - self.m3) > (m3Targ * settings.tInc / 2)) {
-      self.m3 -= m3Targ * settings.tInc
-    } else {
-      self.m3 = m3Targ
-    }
+      if (m3Targ > _self.rovs[rovIndex].m3 && Math.abs(m3Targ - _self.rovs[rovIndex].m3) > (m3Targ * settings.tInc / 2)) {
+        _self.rovs[rovIndex].m3 += m3Targ * settings.tInc
+      } else if (m3Targ < _self.rovs[rovIndex].m3 && Math.abs(m3Targ - _self.rovs[rovIndex].m3) > (m3Targ * settings.tInc / 2)) {
+        _self.rovs[rovIndex].m3 -= m3Targ * settings.tInc
+      } else {
+        _self.rovs[rovIndex].m3 = m3Targ
+      }
 
-    if (dep.makePwmDriver) {
-      self.pwmDriver.setPWM(settings.m1PwmPin, 0, self.m1)
-      self.pwmDriver.setPWM(settings.m2PwmPin, 0, self.m2)
-      self.pwmDriver.setPWM(settings.m3PwmPin, 0, self.m3)
-    }
+      if (dep.makePwmDriver) {
+        _self.pwmDriver.setPWM(settings.rovs[rovIndex].m1PwmPin, 0, _self.rovs[rovIndex].m1)
+        _self.pwmDriver.setPWM(settings.rovs[rovIndex].m2PwmPin, 0, _self.rovs[rovIndex].m2)
+        _self.pwmDriver.setPWM(settings.rovs[rovIndex].m3PwmPin, 0, _self.rovs[rovIndex].m3)
+      }
 
-    // console.log('m1:', (Math.round(self.m1 * 100) / 100), 'm1Targ:', m1Targ, 'm2:', (Math.round(self.m2 * 100) / 100), 'm2Targ:', m2Targ, 'm3:', (Math.round(self.m3 * 100) / 100), 'm3Targ:', m3Targ)
+      console.log('rov:', rovIndex, 'm1:', (Math.round(_self.rovs[rovIndex].m1 * 100) / 100), 'm1Targ:', m1Targ, 'm2:', (Math.round(_self.rovs[rovIndex].m2 * 100) / 100), 'm2Targ:', m2Targ, 'm3:', (Math.round(_self.rovs[rovIndex].m3 * 100) / 100), 'm3Targ:', m3Targ)
+      // console.log('rov:', rovIndex, 'm1Targ:', m1Targ, 'm2Targ:', m2Targ, 'm3Targ:', m3Targ)
+      return false
+    })
   }
 }
 
