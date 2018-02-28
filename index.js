@@ -19,8 +19,9 @@ const settings = {
   pwmDevice: '/dev/i2c-1',
 
   // timing and increment values
-  tInc: 0.05, // value change increment when ramping values at tInt (multiplier 0-1)
+  tInc: 0.025, // value change increment when ramping values at tInt (multiplier 0-1)
   tInt: 70, // number of miliseconds per interval when updating values
+  speedCapMult: 0.5, // make rovs less "zippy" if in a small tank: 0.0 = no speed, 1.0 = full speed
 
   // motor values
   rovs: [
@@ -132,6 +133,13 @@ let EuropaDroneController = {
       aux2Active: false
     }
   }),
+  /*
+  adjustMaxSpeeds: function () {
+    for (let i = 0; i < settings.rovs.length; i++) {
+      settings.rovs[i].m1Min
+    }
+  },
+  */
 
   init: function () {
     let _self = this
@@ -139,7 +147,7 @@ let EuropaDroneController = {
     dep.gamepad.init()
     // List the state of all currently attached devices (dev purposes only)
     for (var i = 0, l = dep.gamepad.numDevices(); i < l; i++) {
-      console.log(i, dep.gamepad.deviceAtIndex())
+      console.log(i, dep.gamepad.deviceAtIndex(i))
     }
 
     // Create a loop and poll for events
@@ -153,12 +161,14 @@ let EuropaDroneController = {
       _self.pwmDriver = dep.makePwmDriver({ address: settings.pwmAddress, device: settings.pwmDevice })
       _self.pwmDriver.setPWMFreq(settings.pwmFrequency)
 
-      // reset to idle
-      // !!! leave on for now to not stop rover if unresolved gamepad issue kicks in (may take a look my_self soon)
-      // https://github.com/creationix/node-gamepad/issues/15
-      // _self.pwmDriver.setPWM(settings.m1PwmPin, 0, settings.m1Stop)
-      // _self.pwmDriver.setPWM(settings.m2PwmPin, 0, settings.m2Stop)
-      // _self.pwmDriver.setPWM(settings.m3PwmPin, 0, settings.m3Stop)
+      // reset to idle on startup (sometimes the binary that reads controllers crashes, app restarts)
+      // why: https://github.com/creationix/node-gamepad/issues/15
+      _self.rovs.map(function (rov, rovIndex) {
+        _self.pwmDriver.setPWM(settings.rovs[rovIndex].m1PwmPin, 0, _self.rovs[rovIndex].m1)
+        _self.pwmDriver.setPWM(settings.rovs[rovIndex].m2PwmPin, 0, _self.rovs[rovIndex].m2)
+        _self.pwmDriver.setPWM(settings.rovs[rovIndex].m3PwmPin, 0, _self.rovs[rovIndex].m3)
+        return false
+      })
 
       // !!! TEMP test
       /*
@@ -328,6 +338,7 @@ let EuropaDroneController = {
   // Ramp motors acceleration
   rampMotors: function () {
     let _self = this // !!! should I start using ES6 arrows for events instead?
+
     _self.rovs.map(function (rov, rovIndex) {
       let m1Targ, m2Targ, m3Targ
 
@@ -419,7 +430,6 @@ let EuropaDroneController = {
         _self.pwmDriver.setPWM(settings.rovs[rovIndex].m3PwmPin, 0, _self.rovs[rovIndex].m3)
       }
 
-      console.log('rov:', rovIndex, 'm1:', (Math.round(_self.rovs[rovIndex].m1 * 100) / 100), 'm1Targ:', m1Targ, 'm2:', (Math.round(_self.rovs[rovIndex].m2 * 100) / 100), 'm2Targ:', m2Targ, 'm3:', (Math.round(_self.rovs[rovIndex].m3 * 100) / 100), 'm3Targ:', m3Targ)
       // console.log('rov:', rovIndex, 'm1Targ:', m1Targ, 'm2Targ:', m2Targ, 'm3Targ:', m3Targ)
       return false
     })
