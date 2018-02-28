@@ -4,7 +4,7 @@ Control an underwater drone with a USB gamepad, designed for use in the [Space F
 
 ## Work-In-Progress
 
-This project is still a work-in-progress. Stay tuned for updates.
+This project is still a work-in-progress. One of the biggest gaps at the moment is a need to tune values for each PWM hat and ECS as optimal settings per piece of hardware varies.
 
 ## Ingredients
 
@@ -60,11 +60,19 @@ curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
 sudo apt-get install -y nodejs
 ```
 
-Install i2c requirements allowing the Pi to talk to the PWM hat.
+## Configure i2c Communications
 
 Follow these instructions to install and configure i2c requirements so that the Pi can communicate with the Pi servo hat. Some of the instructions won't match exactly e.g. commenting out something in a file with nothing to comment out and an old version of something not being supported, but it should work for this project:
 
 [https://www.npmjs.com/package/i2c](https://www.npmjs.com/package/i2c)
+
+TODO: Cover this in detail here.
+
+TODO: Test i2c communications.
+
+TODO: sudo apt-get install i2c-tools
+
+TODO: sudo i2cdetect -y 1
 
 ## Install Project Code
 
@@ -73,6 +81,8 @@ Install this project to the Pi.
 ```
 cd ~
 git clone https://github.com/owntheweb/europa-drone.git
+cd europa-drone
+npm install
 ```
 
 ## Test
