@@ -22,7 +22,7 @@ const settings = {
   tInc: 0.025, // value change increment when ramping values at tInt (multiplier 0-1)
   tInt: 70, // number of miliseconds per interval when updating values
   speedCapMult: 0.5, // make rovs less "zippy" if in a small tank: 0.0 = no speed, 1.0 = full speed
-
+  maxHoldMilisecs: 2500, // max button hold milisecons
   // motor values
   rovs: [
     // rov 1 (first detected controller)
@@ -236,32 +236,40 @@ let EuropaDroneController = {
         if (value === -1) { // up
           console.log('forward, gamepad: ' + padIndex)
           _self.rovs[padIndex].forwardActive = true
+          _self.setButtonTimeout(padIndex, 'forward')
         } else if (value === 1) { // down
           console.log('backward, gamepad: ' + padIndex)
           _self.rovs[padIndex].backwardActive = true
+          _self.setButtonTimeout(padIndex, 'backward')
         } else if (value === 0) { // axis released
           if (_self.rovs[padIndex].forwardActive === true) {
             console.log('forward released, gamepad: ' + padIndex)
             _self.rovs[padIndex].forwardActive = false
+            _self.clearButtonTimeout(padIndex, 'forward')
           } else if (_self.rovs[padIndex].backwardActive === true) {
             console.log('backward released, gamepad: ' + padIndex)
             _self.rovs[padIndex].backwardActive = false
+            _self.clearButtonTimeout(padIndex, 'backward')
           }
         }
       } else { // left/right
         if (value === -1) { // left
           console.log('left, gamepad: ' + padIndex)
           _self.rovs[padIndex].leftActive = true
+          _self.setButtonTimeout(padIndex, 'left')
         } else if (value === 1) { // right
           console.log('right, gamepad: ' + padIndex)
           _self.rovs[padIndex].rightActive = true
+          _self.setButtonTimeout(padIndex, 'right')
         } else if (value === 0) { // axis released
           if (_self.rovs[padIndex].leftActive === true) {
             console.log('left released, gamepad: ' + padIndex)
             _self.rovs[padIndex].leftActive = false
+            _self.clearButtonTimeout(padIndex, 'left')
           } else if (_self.rovs[padIndex].rightActive === true) {
             console.log('right released, gamepad: ' + padIndex)
             _self.rovs[padIndex].rightActive = false
+            _self.clearButtonTimeout(padIndex, 'right')
           }
         }
       }
@@ -280,10 +288,12 @@ let EuropaDroneController = {
         // console.log('B')
         console.log('down, gamepad: ' + padIndex)
         _self.rovs[padIndex].downActive = true
+        _self.setButtonTimeout(padIndex, 'down')
       } else if (num === 1) { // A on NES USB controller
         // console.log('A')
         console.log('up, gamepad: ' + padIndex)
         _self.rovs[padIndex].upActive = true
+        _self.setButtonTimeout(padIndex, 'up')
       } else if (num === 8) { // select on NES USB controller
         // console.log('select')
         if (_self.rovs[padIndex].aux1Active === false) {
@@ -318,10 +328,12 @@ let EuropaDroneController = {
       if (num === 0) { // B on NES USB controller
         console.log('down released, gamepad: ' + padIndex)
         _self.rovs[padIndex].downActive = false
+        _self.clearButtonTimeout(padIndex, 'down')
       } else if (num === 1) { // A on NES USB controller
         // console.log('A released')
         console.log('up released, gamepad: ' + padIndex)
         _self.rovs[padIndex].upActive = false
+        _self.clearButtonTimeout(padIndex, 'up')
       } else if (num === 8) { // select on NES USB controller
         // console.log('select released')
       } else if (num === 9) { // start on NES USB controller
@@ -333,6 +345,88 @@ let EuropaDroneController = {
     setInterval(function () {
       _self.rampMotors()
     }, settings.tInt)
+  },
+
+  // promote good behavior and overcome cheap game pad occasional missing up events
+  setButtonTimeout: function (rovIndex, direction) {
+    let _self = this
+    _self.clearButtonTimeout(rovIndex, direction)
+
+    switch (direction) {
+      case 'forward':
+        _self.rovs[rovIndex].forwardTimeout = setTimeout(function (rovIndex, direction) {
+          _self.rovs[rovIndex].forwardActive = false
+          _self.clearButtonTimeout(rovIndex, direction)
+        }.bind(_self, rovIndex, direction), settings.maxHoldMilisecs)
+        break
+      case 'backward':
+        _self.rovs[rovIndex].backwardTimeout = setTimeout(function (rovIndex, direction) {
+          _self.rovs[rovIndex].backwardActive = false
+          _self.clearButtonTimeout(rovIndex, direction)
+        }.bind(_self, rovIndex, direction), settings.maxHoldMilisecs)
+        break
+      case 'left':
+        _self.rovs[rovIndex].leftTimeout = setTimeout(function (rovIndex, direction) {
+          _self.rovs[rovIndex].leftActive = false
+          _self.clearButtonTimeout(rovIndex, direction)
+        }.bind(_self, rovIndex, direction), settings.maxHoldMilisecs)
+        break
+      case 'right':
+        _self.rovs[rovIndex].rightTimeout = setTimeout(function (rovIndex, direction) {
+          _self.rovs[rovIndex].rightActive = false
+          _self.clearButtonTimeout(rovIndex, direction)
+        }.bind(_self, rovIndex, direction), settings.maxHoldMilisecs)
+        break
+      case 'down':
+        _self.rovs[rovIndex].downTimeout = setTimeout(function (rovIndex, direction) {
+          _self.rovs[rovIndex].downActive = false
+          _self.clearButtonTimeout(rovIndex, direction)
+        }.bind(_self, rovIndex, direction), settings.maxHoldMilisecs)
+        break
+      case 'up':
+        _self.rovs[rovIndex].upTimeout = setTimeout(function (rovIndex, direction) {
+          _self.rovs[rovIndex].upActive = false
+          _self.clearButtonTimeout(rovIndex, direction)
+        }.bind(_self, rovIndex, direction), settings.maxHoldMilisecs)
+        break
+    }
+  },
+
+  // clear button timeout
+  clearButtonTimeout: function (rovIndex, direction) {
+    let _self = this
+    switch (direction) {
+      case 'forward':
+        if (_self.rovs[rovIndex].hasOwnProperty('forwardTimeout') && typeof _self.rovs[rovIndex].forwardTimeout !== 'undefined') {
+          clearTimeout(_self.rovs[rovIndex].forwardTimeout)
+        }
+        break
+      case 'backward':
+        if (_self.rovs[rovIndex].hasOwnProperty('backwardTimeout') && typeof _self.rovs[rovIndex].backwardTimeout !== 'undefined') {
+          clearTimeout(_self.rovs[rovIndex].backwardTimeout)
+        }
+        break
+      case 'left':
+        if (_self.rovs[rovIndex].hasOwnProperty('leftTimeout') && typeof _self.rovs[rovIndex].leftTimeout !== 'undefined') {
+          clearTimeout(_self.rovs[rovIndex].leftTimeout)
+        }
+        break
+      case 'right':
+        if (_self.rovs[rovIndex].hasOwnProperty('rightTimeout') && typeof _self.rovs[rovIndex].rightTimeout !== 'undefined') {
+          clearTimeout(_self.rovs[rovIndex].rightTimeout)
+        }
+        break
+      case 'down':
+        if (_self.rovs[rovIndex].hasOwnProperty('downTimeout') && typeof _self.rovs[rovIndex].downTimeout !== 'undefined') {
+          clearTimeout(_self.rovs[rovIndex].downTimeout)
+        }
+        break
+      case 'up':
+        if (_self.rovs[rovIndex].hasOwnProperty('upTimeout') && typeof _self.rovs[rovIndex].upTimeout !== 'undefined') {
+          clearTimeout(_self.rovs[rovIndex].upTimeout)
+        }
+        break
+    }
   },
 
   // Ramp motors acceleration
@@ -430,7 +524,10 @@ let EuropaDroneController = {
         _self.pwmDriver.setPWM(settings.rovs[rovIndex].m3PwmPin, 0, _self.rovs[rovIndex].m3)
       }
 
-      // console.log('rov:', rovIndex, 'm1Targ:', m1Targ, 'm2Targ:', m2Targ, 'm3Targ:', m3Targ)
+      if (rovIndex === 0) {
+        console.log('rov:', rovIndex, 'm1Targ:', m1Targ, 'm2Targ:', m2Targ, 'm3Targ:', m3Targ)
+      }
+
       return false
     })
   }
