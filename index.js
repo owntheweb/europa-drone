@@ -182,34 +182,8 @@ let EuropaDroneController = {
           tmpDir = 4
         }
 
-        _self.pwmDriver.setPWM(1, 0, tmpMod)
-        _self.pwmDriver.setPWM(2, 0, tmpMod)
+        _self.pwmDriver.setPWM(0, 0, tmpMod)
         console.log(tmpMod)
-      }, 100)
-      */
-      /*
-      var tmpMod = 384
-      tmpMod = 666
-      var delay = 50
-      setInterval(function () {
-      */
-        /*
-        tmpMod += tmpDir
-        if (tmpMod >= 420) {
-          tmpDir = -4
-        } else if (tmpMod <= 240) {
-          tmpDir = 4
-        }
-        */
-        /*
-        delay -= 1;
-        if(delay <= 0) {
-          delay = 50
-          tmpMod += 1;
-          _self.pwmDriver.setPWM(1, 0, tmpMod)
-          console.log(tmpMod)
-        }
-
       }, 100)
       */
       // END TEMP TEST
